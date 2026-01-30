@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Ultra Endurance Race Nutrition Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .about-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .about-section h2 {
+            color: #f5576c;
+            margin-bottom: 15px;
+        }
+        
+        .about-section p {
+            margin-bottom: 15px;
+        }
+        
+        .emoji-highlight {
+            font-size: 3rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .trail-quote {
+            background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%);
+            border-left: 4px solid #f5576c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list li::before {
+            content: "🏔️ ";
+        }
+        
+        .nav-links {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .nav-links a {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .nav-links a:hover {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .vibe-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏃 About This Tracker</h1>
+            <span class="vibe-badge">✨ Vibe Coded with Love</span>
+        </header>
+        
+        <div class="about-section">
+            <div class="emoji-highlight">🏔️ 🏃 ⛰️</div>
+            <h2>The Story</h2>
+            <p>Hey there, fellow trail runner! 👋</p>
+            <p>I'm a trail runner who got tired of bonking on long runs because I couldn't keep track of my nutrition. You know the feeling – 6 hours into a 100km and suddenly you realise you've had nothing but two gels and half a sandwich since the start. Not ideal when you've still got a mountain to climb!</p>
+            <p>So I built this little tool. It started as a quick weekend project – just me and my AI coding buddy vibing together, building something that actually solves a real problem I have. No fancy startup, no business plan, just a trail runner scratching an itch.</p>
+            
+            <div class="trail-quote">
+                "Nutrition is the fourth discipline of ultra running – after running, hiking, and complaining about your feet."
+            </div>
+        </div>
+        
+        <div class="about-section">
+            <h2>What It Does</h2>
+            <ul class="features-list">
+                <li>Build a pantry of your favourite race nutrition</li>
+                <li>Set hourly targets for carbs, sodium, caffeine, and more</li>
+                <li>Log what you actually consume during training or race day</li>
+                <li>Visualise your intake against your goals with colourful charts</li>
+                <li>Export and import data so you can review your nutrition strategy later</li>
+            </ul>
+        </div>
+        
+        <div class="about-section">
+            <h2>Why Trail Running?</h2>
+            <p>Ultra and trail running presents unique nutrition challenges:</p>
+            <p>🕐 <strong>Long durations</strong> – You're out there for 10, 20, 30+ hours. Small errors compound massively.</p>
+            <p>🌡️ <strong>Variable conditions</strong> – Heat, cold, altitude all affect your needs.</p>
+            <p>🤢 <strong>Gut issues</strong> – The bane of every ultra runner. Tracking helps identify what works for YOUR stomach.</p>
+            <p>🧠 <strong>Decision fatigue</strong> – When you're exhausted at 3am, having a plan (and tracking adherence) is crucial.</p>
+        </div>
+        
+        <div class="about-section">
+            <h2>Made With 💜</h2>
+            <p>This was genuinely fun to build. Just vibing, coding, iterating – the way side projects should be. No frameworks heavier than Chart.js, no backend, no accounts to create. Just pure, simple HTML/CSS/JavaScript that runs in your browser.</p>
+            <p>Your data stays on your device. Export it when you need to. That's it.</p>
+            <p>I hope you find it as useful as I do. See you on the trails! 🏔️</p>
+            <p style="margin-top: 20px; color: #888; font-style: italic;">Happy running, and may your gels never explode in your pack! 🎒</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html">🏠 Back to Tracker</a>
+            <a href="guide.html">📖 User Guide</a>
+        </div>
+    </div>
+</body>
+</html>

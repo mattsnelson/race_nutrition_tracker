@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Endurance Race Nutrition Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 30px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section-card h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .pantry-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .pantry-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f5576c;
+        }
+        
+        .pantry-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .pantry-item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .pantry-item-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .log-entry {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid #4ECDC4;
+        }
+        
+        .log-entry-time {
+            font-weight: 600;
+            color: #f5576c;
+            margin-bottom: 5px;
+        }
+        
+        .edit-form {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+        
+        .edit-form input, .edit-form select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        .chart-wrapper {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .chart-wrapper h3 {
+            margin-bottom: 15px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .nav-links {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .nav-links a {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .nav-links a:hover {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .goal-period {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .goal-period-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .goal-period-time {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #667eea;
+        }
+        
+        .goal-period-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .goal-period-details span {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>🏃 Ultra Endurance Race Nutrition Tracker</h1>
+            <p>Track your race nutrition strategy</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pantry')">🍎 Pantry</button>
+            <button class="tab-btn" onclick="switchTab('consumption')">📝 Race Log</button>
+            <button class="tab-btn" onclick="switchTab('goals')">🎯 Goals</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">📊 Analysis</button>
+        </div>
+        
+        <!-- PANTRY TAB -->
+        <div id="pantry-tab" class="tab-content active">
+            <div class="section-card">
+                <h2>🍎 Add Food to Pantry</h2>
+                <form id="pantryForm" onsubmit="addFoodToPantry(event)">
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #555;">Type *</label>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="itemType" value="food" checked id="typeFood" onchange="updateFormLabels()">
+                                🍎 Food
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="itemType" value="drink" id="typeDrink" onchange="updateFormLabels()">
+                                💧 Drink
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="foodName" required placeholder="e.g., Sad Banana">
+                        </div>
+                        <div class="form-group">
+                            <label id="servingSizeLabel">Serving Size (g) *</label>
+                            <input type="number" id="servingSize" required placeholder="e.g., 68">
+                        </div>
+                        <div class="form-group">
+                            <label id="kilojoulesLabel">Kilojoules (kJ per serve) *</label>
+                            <input type="number" id="kilojoules" required placeholder="e.g., 1046">
+                        </div>
+                        <div class="form-group">
+                            <label id="carbsLabel">Carbs (g per serve) *</label>
+                            <input type="number" step="0.1" id="carbs" required placeholder="e.g., 44">
+                        </div>
+                        <div class="form-group">
+                            <label id="sugarsLabel">Sugars (g per serve)</label>
+                            <input type="number" step="0.1" id="sugars" placeholder="e.g., 20">
+                        </div>
+                        <div class="form-group">
+                            <label id="proteinLabel">Protein (g per serve)</label>
+                            <input type="number" step="0.1" id="protein" placeholder="e.g., 10">
+                        </div>
+                        <div class="form-group">                            <label id="fatLabel">Fat (g per serve)</label>
+                            <input type="number" step="0.1" id="fat" placeholder="e.g., 5">
+                        </div>
+                        <div class="form-group">                            <label id="fibreLabel">Fibre (g)</label>
+                            <input type="number" step="0.1" id="fibre" placeholder="e.g., 3">
+                        </div>
+                        <div class="form-group">
+                            <label id="sodiumLabel">Sodium (mg per serve)</label>
+                            <input type="number" id="sodium" placeholder="e.g., 200">
+                        </div>
+                        <div class="form-group">
+                            <label id="magnesiumLabel">Magnesium (mg per serve)</label>
+                            <input type="number" id="magnesium" placeholder="e.g., 25">
+                        </div>
+                        <div class="form-group">
+                            <label id="potassiumLabel">Potassium (mg per serve)</label>
+                            <input type="number" id="potassium" placeholder="e.g., 50">
+                        </div>
+                        <div class="form-group">
+                            <label id="calciumLabel">Calcium (mg per serve)</label>
+                            <input type="number" id="calcium" placeholder="e.g., 30">
+                        </div>
+                        <div class="form-group">
+                            <label id="caffeineLabel">Caffeine (mg per serve)</label>
+                            <input type="number" id="caffeine" placeholder="e.g., 50">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Pantry</button>
+                </form>
+            </div>
+            
+            <div class="section-card">
+                <h2>🗄️ Your Pantry</h2>
+                <div style="margin-bottom: 15px;">
+                    <button class="btn btn-primary" onclick="exportPantryCSV()" style="margin-right: 10px;">📥 Export CSV</button>
+                    <label class="btn btn-primary" style="cursor: pointer;">
+                        📤 Import CSV
+                        <input type="file" id="importFile" accept=".csv" onchange="importPantryCSV(event)" style="display: none;">
+                    </label>
+                </div>
+                <div id="pantryList" class="pantry-items"></div>
+            </div>
+        </div>
+        
+        <!-- CONSUMPTION TAB -->
+        <div id="consumption-tab" class="tab-content">
+            <div class="section-card">
+                <h2>📝 Log Consumption</h2>
+                <form id="consumptionForm" onsubmit="addConsumption(event)">
+                    <div class="form-group">
+                        <label>Consumption Type *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="consumptionType" value="bolus" checked onchange="toggleContinuousFields()"> ⚡ Bolus (instant)</label>
+                            <label><input type="radio" name="consumptionType" value="continuous" onchange="toggleContinuousFields()"> ↔️ Continuous (over time)</label>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label id="startTimeLabel">Time *</label>
+                            <div style="display:flex;gap:10px;">
+                                <input type="number" id="startHour" min="0" max="48" required placeholder="Hour" style="flex:1;">
+                                <input type="number" id="startMinute" min="0" max="59" required placeholder="Min" style="flex:1;">
+                            </div>
+                        </div>
+                        <div class="form-group" id="endTimeGroup" style="display:none;">
+                            <label>End Time *</label>
+                            <div style="display:flex;gap:10px;">
+                                <input type="number" id="endHour" min="0" max="48" placeholder="Hour" style="flex:1;">
+                                <input type="number" id="endMinute" min="0" max="59" placeholder="Min" style="flex:1;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Food Item *</label>
+                            <select id="foodSelect" required onchange="updateAmountField()">
+                                <option value="">Select...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="amountLabel">Amount *</label>
+                            <div style="display:flex;gap:10px;">
+                                <input type="number" step="0.1" id="amountConsumed" required placeholder="e.g., 300" style="flex:1;">
+                                <select id="amountUnit" style="width:80px;display:none;" onchange="updateAmountPlaceholder()">
+                                    <option value="grams">g</option>
+                                    <option value="serves">serves</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Log Consumption</button>
+                </form>
+            </div>
+            
+            <div class="section-card">
+                <h2>📋 Race Log</h2>
+                <div style="margin-bottom: 15px;">
+                    <button class="btn btn-primary" onclick="exportRaceLogCSV()" style="margin-right: 10px;">📥 Export CSV</button>
+                    <label class="btn btn-primary" style="cursor:pointer;">
+                        📤 Import CSV
+                        <input type="file" accept=".csv" onchange="importRaceLogCSV(event)" style="display:none;">
+                    </label>
+                </div>
+                <div id="consumptionLog"></div>
+            </div>
+        </div>
+        
+        <!-- GOALS TAB -->
+        <div id="goals-tab" class="tab-content">
+            <div class="section-card">
+                <h2>🎯 Nutrition Goals</h2>
+                
+                <!-- Goal Mode Toggle -->
+                <div style="margin-bottom:20px;">
+                    <label style="font-weight: 600; color: #555;">Goal Mode</label>
+                    <div class="radio-group" style="margin-top:8px;">
+                        <label><input type="radio" name="goalMode" value="simple" checked onchange="toggleGoalMode()"> 📊 Simple (same rate for whole race)</label>
+                        <label><input type="radio" name="goalMode" value="advanced" onchange="toggleGoalMode()"> ⚙️ Advanced (different rates per time period)</label>
+                    </div>
+                </div>
+                
+                <!-- SIMPLE GOALS -->
+                <div id="simpleGoalsSection">
+                    <p style="color:#666; margin-bottom:20px;">Set a single hourly target for each nutrient. These rates apply for the entire race.</p>
+                    <form id="simpleGoalsForm" onsubmit="saveSimpleGoals(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Kilojoules/hour</label>
+                                <input type="number" id="simpleGoalKilojoules" placeholder="e.g., 1250">
+                            </div>
+                            <div class="form-group">
+                                <label>Carbs/hour (g)</label>
+                                <input type="number" id="simpleGoalCarbs" placeholder="e.g., 80">
+                            </div>
+                            <div class="form-group">
+                                <label>Sugars/hour (g)</label>
+                                <input type="number" id="simpleGoalSugars" placeholder="e.g., 60">
+                            </div>
+                            <div class="form-group">
+                                <label>Protein/hour (g)</label>
+                                <input type="number" id="simpleGoalProtein" placeholder="e.g., 10">
+                            </div>
+                            <div class="form-group">
+                                <label>Fat/hour (g)</label>
+                                <input type="number" id="simpleGoalFat" placeholder="e.g., 5">
+                            </div>
+                            <div class="form-group">
+                                <label>Fibre/hour (g)</label>
+                                <input type="number" id="simpleGoalFibre" placeholder="e.g., 2">
+                            </div>
+                            <div class="form-group">
+                                <label>Sodium/hour (mg)</label>
+                                <input type="number" id="simpleGoalSodium" placeholder="e.g., 500">
+                            </div>
+                            <div class="form-group">
+                                <label>Magnesium/hour (mg)</label>
+                                <input type="number" id="simpleGoalMagnesium" placeholder="e.g., 50">
+                            </div>
+                            <div class="form-group">
+                                <label>Potassium/hour (mg)</label>
+                                <input type="number" id="simpleGoalPotassium" placeholder="e.g., 200">
+                            </div>
+                            <div class="form-group">
+                                <label>Calcium/hour (mg)</label>
+                                <input type="number" id="simpleGoalCalcium" placeholder="e.g., 100">
+                            </div>
+                            <div class="form-group">
+                                <label>Total Electrolytes/hour (mg)</label>
+                                <input type="number" id="simpleGoalElectrolytes" placeholder="e.g., 850">
+                            </div>
+                            <div class="form-group">
+                                <label>Caffeine/hour (mg)</label>
+                                <input type="number" id="simpleGoalCaffeine" placeholder="e.g., 50">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Goals</button>
+                    </form>
+                </div>
+                
+                <!-- ADVANCED GOALS -->
+                <div id="advancedGoalsSection" style="display:none;">
+                    <p style="color:#666; margin-bottom:20px;">Set different targets for different phases of your race. Add time periods with specific hourly goals.</p>
+                    
+                    <div id="goalPeriodsList"></div>
+                    
+                    <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee;">
+                        <h3 style="margin-bottom:15px;">➕ Add Goal Period</h3>
+                        <form id="addGoalPeriodForm" onsubmit="addGoalPeriod(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Start Time (hours into race) *</label>
+                                    <input type="number" id="periodStartHour" min="0" max="100" required placeholder="e.g., 0">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Time (hours into race) *</label>
+                                    <input type="number" id="periodEndHour" min="0" max="100" required placeholder="e.g., 3">
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Kilojoules/hour</label>
+                                    <input type="number" id="periodKilojoules" placeholder="e.g., 1250">
+                                </div>
+                                <div class="form-group">
+                                    <label>Carbs/hour (g)</label>
+                                    <input type="number" id="periodCarbs" placeholder="e.g., 80">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sugars/hour (g)</label>
+                                    <input type="number" id="periodSugars" placeholder="e.g., 60">
+                                </div>
+                                <div class="form-group">
+                                    <label>Protein/hour (g)</label>
+                                    <input type="number" id="periodProtein" placeholder="e.g., 10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Fat/hour (g)</label>
+                                    <input type="number" id="periodFat" placeholder="e.g., 5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Fibre/hour (g)</label>
+                                    <input type="number" id="periodFibre" placeholder="e.g., 2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sodium/hour (mg)</label>
+                                    <input type="number" id="periodSodium" placeholder="e.g., 500">
+                                </div>
+                                <div class="form-group">
+                                    <label>Magnesium/hour (mg)</label>
+                                    <input type="number" id="periodMagnesium" placeholder="e.g., 50">
+                                </div>
+                                <div class="form-group">
+                                    <label>Potassium/hour (mg)</label>
+                                    <input type="number" id="periodPotassium" placeholder="e.g., 200">
+                                </div>
+                                <div class="form-group">
+                                    <label>Calcium/hour (mg)</label>
+                                    <input type="number" id="periodCalcium" placeholder="e.g., 100">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Electrolytes/hour (mg)</label>
+                                    <input type="number" id="periodElectrolytes" placeholder="e.g., 850">
+                                </div>
+                                <div class="form-group">
+                                    <label>Caffeine/hour (mg)</label>
+                                    <input type="number" id="periodCaffeine" placeholder="e.g., 50">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Goal Period</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ANALYSIS TAB -->
+        <div id="analysis-tab" class="tab-content">
+            <div class="section-card">
+                <h2>📊 Race Analysis</h2>
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Kilojoules</h3>
+                        <canvas id="kilojoulesChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Carbohydrates</h3>
+                        <canvas id="carbsChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Sugars</h3>
+                        <canvas id="sugarsChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Protein</h3>
+                        <canvas id="proteinChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Fat</h3>
+                        <canvas id="fatChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Fibre</h3>
+                        <canvas id="fibreChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Sodium</h3>
+                        <canvas id="sodiumChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Magnesium</h3>
+                        <canvas id="magnesiumChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Potassium</h3>
+                        <canvas id="potassiumChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Calcium</h3>
+                        <canvas id="calciumChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Total Electrolytes (Na+Mg+K+Ca)</h3>
+                        <canvas id="electrolytesChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Caffeine</h3>
+                        <canvas id="caffeineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="guide.html">📖 Guide</a>
+            <a href="about.html">About</a>
+            <a href="#" onclick="clearAllData(); return false;" style="background:#ffebee;color:#c62828;">🗑️ Clear All Data</a>
+        </div>
+    </div>
+    
+    <script>
+        let pantry = [];
+        let consumptionLog = [];
+        let goalPeriods = [];
+        let simpleGoals = {};
+        let goalMode = 'simple'; // 'simple' or 'advanced'
+        let charts = {};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+            renderPantry();
+            renderConsumptionLog();
+            updateFoodSelect();
+            renderGoalPeriods();
+            loadSimpleGoals();
+            initializeCharts();
+            updateFormLabels();
+            applyGoalMode();
+        });
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'analysis') updateAllCharts();
+        }
+        
+        function toggleGoalMode() {
+            goalMode = document.querySelector('input[name="goalMode"]:checked').value;
+            applyGoalMode();
+            saveToLocalStorage();
+        }
+        
+        function applyGoalMode() {
+            document.getElementById('simpleGoalsSection').style.display = goalMode === 'simple' ? 'block' : 'none';
+            document.getElementById('advancedGoalsSection').style.display = goalMode === 'advanced' ? 'block' : 'none';
+            // Set radio button
+            const radio = document.querySelector(`input[name="goalMode"][value="${goalMode}"]`);
+            if (radio) radio.checked = true;
+        }
+        
+        function updateFormLabels() {
+            const isFood = document.getElementById('typeFood').checked;
+            const servingInput = document.getElementById('servingSize');
+            const servingLabel = document.getElementById('servingSizeLabel');
+            const kilojoulesLabel = document.getElementById('kilojoulesLabel');
+            const carbsLabel = document.getElementById('carbsLabel');
+            const proteinLabel = document.getElementById('proteinLabel');
+            const fatLabel = document.getElementById('fatLabel');
+            const fibreLabel = document.getElementById('fibreLabel');
+            const sodiumLabel = document.getElementById('sodiumLabel');
+            const sugarsLabel = document.getElementById('sugarsLabel');
+            const magnesiumLabel = document.getElementById('magnesiumLabel');
+            const potassiumLabel = document.getElementById('potassiumLabel');
+            const calciumLabel = document.getElementById('calciumLabel');
+            const caffeineLabel = document.getElementById('caffeineLabel');
+            
+            if (isFood) {
+                servingInput.disabled = false;
+                servingInput.value = '';
+                servingInput.placeholder = 'e.g., 68';
+                servingLabel.textContent = 'Serving Size (g) *';
+                kilojoulesLabel.textContent = 'Kilojoules (kJ per serve) *';
+                carbsLabel.textContent = 'Carbs (g per serve) *';
+                sugarsLabel.textContent = 'Sugars (g per serve)';
+                proteinLabel.textContent = 'Protein (g per serve)';
+                fatLabel.textContent = 'Fat (g per serve)';
+                fibreLabel.textContent = 'Fibre (g per serve)';
+                sodiumLabel.textContent = 'Sodium (mg per serve)';
+                magnesiumLabel.textContent = 'Magnesium (mg per serve)';
+                potassiumLabel.textContent = 'Potassium (mg per serve)';
+                calciumLabel.textContent = 'Calcium (mg per serve)';
+                caffeineLabel.textContent = 'Caffeine (mg per serve)';
+            } else {
+                servingInput.disabled = true;
+                servingInput.value = '100';
+                servingLabel.textContent = 'Serving Size (fixed)';
+                kilojoulesLabel.textContent = 'Kilojoules (kJ per 100ml) *';
+                carbsLabel.textContent = 'Carbs (g per 100ml) *';
+                sugarsLabel.textContent = 'Sugars (g per 100ml)';
+                proteinLabel.textContent = 'Protein (g per 100ml)';
+                fatLabel.textContent = 'Fat (g per 100ml)';
+                fibreLabel.textContent = 'Fibre (g per 100ml)';
+                sodiumLabel.textContent = 'Sodium (mg per 100ml)';
+                magnesiumLabel.textContent = 'Magnesium (mg per 100ml)';
+                potassiumLabel.textContent = 'Potassium (mg per 100ml)';
+                calciumLabel.textContent = 'Calcium (mg per 100ml)';
+                caffeineLabel.textContent = 'Caffeine (mg per 100ml)';
+            }
+        }
+        
+        function addFoodToPantry(event) {
+            event.preventDefault();
+            const food = {
+                id: Date.now(),
+                type: document.querySelector('input[name="itemType"]:checked').value,
+                name: document.getElementById('foodName').value,
+                servingSize: parseFloat(document.getElementById('servingSize').value),
+                kilojoules: parseFloat(document.getElementById('kilojoules').value),
+                carbs: parseFloat(document.getElementById('carbs').value),
+                sugars: document.getElementById('sugars').value.trim() ? parseFloat(document.getElementById('sugars').value) : 'NR',
+                protein: document.getElementById('protein').value.trim() ? parseFloat(document.getElementById('protein').value) : 'NR',
+                fat: document.getElementById('fat').value.trim() ? parseFloat(document.getElementById('fat').value) : 'NR',
+                fibre: document.getElementById('fibre').value.trim() ? parseFloat(document.getElementById('fibre').value) : 'NR',
+                sodium: document.getElementById('sodium').value.trim() ? parseFloat(document.getElementById('sodium').value) : 'NR',
+                magnesium: document.getElementById('magnesium').value.trim() ? parseFloat(document.getElementById('magnesium').value) : 'NR',
+                potassium: document.getElementById('potassium').value.trim() ? parseFloat(document.getElementById('potassium').value) : 'NR',
+                calcium: document.getElementById('calcium').value.trim() ? parseFloat(document.getElementById('calcium').value) : 'NR',
+                caffeine: document.getElementById('caffeine').value.trim() ? parseFloat(document.getElementById('caffeine').value) : 'NR'
+            };
+            pantry.push(food);
+            saveToLocalStorage();
+            renderPantry();
+            updateFoodSelect();
+            document.getElementById('pantryForm').reset();
+            document.getElementById('typeFood').checked = true;
+            updateFormLabels();
+        }
+        
+        function deleteFoodFromPantry(id) {
+            pantry = pantry.filter(food => food.id !== id);
+            saveToLocalStorage();
+            renderPantry();
+            updateFoodSelect();
+        }
+        
+        function editPantryItem(id) {
+            const food = pantry.find(f => f.id === id);
+            if (!food) return;
+            
+            const getVal = (v) => v === 'NR' ? '' : v;
+            const unit = food.type === 'drink' ? 'ml' : 'g';
+            const perUnit = food.type === 'drink' ? 'per 100ml' : 'per serve';
+            
+            const editHtml = `
+                <div class="edit-form">
+                    <div class="form-grid" style="margin-bottom:15px;">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="editType-${id}" onchange="toggleEditPantryType(${id})">
+                                <option value="food" ${food.type === 'food' ? 'selected' : ''}>🍎 Food</option>
+                                <option value="drink" ${food.type === 'drink' ? 'selected' : ''}>💧 Drink</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="editName-${id}" value="${food.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label id="editServingLabel-${id}">Serving (${unit}) *</label>
+                            <input type="number" step="0.1" id="editServing-${id}" value="${food.servingSize}" ${food.type === 'drink' ? 'readonly' : ''}>
+                        </div>
+                        <div class="form-group">
+                            <label>Kilojoules (kJ) *</label>
+                            <input type="number" step="0.1" id="editKJ-${id}" value="${food.kilojoules}">
+                        </div>
+                        <div class="form-group">
+                            <label>Carbs (g) *</label>
+                            <input type="number" step="0.1" id="editCarbs-${id}" value="${food.carbs}">
+                        </div>
+                        <div class="form-group">
+                            <label>Sugars (g)</label>
+                            <input type="number" step="0.1" id="editSugars-${id}" value="${getVal(food.sugars)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Protein (g)</label>
+                            <input type="number" step="0.1" id="editProtein-${id}" value="${getVal(food.protein)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Fat (g)</label>
+                            <input type="number" step="0.1" id="editFat-${id}" value="${getVal(food.fat)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Fibre (g)</label>
+                            <input type="number" step="0.1" id="editFibre-${id}" value="${getVal(food.fibre)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Sodium (mg)</label>
+                            <input type="number" step="0.1" id="editSodium-${id}" value="${getVal(food.sodium)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Magnesium (mg)</label>
+                            <input type="number" step="0.1" id="editMagnesium-${id}" value="${getVal(food.magnesium)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Potassium (mg)</label>
+                            <input type="number" step="0.1" id="editPotassium-${id}" value="${getVal(food.potassium)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Calcium (mg)</label>
+                            <input type="number" step="0.1" id="editCalcium-${id}" value="${getVal(food.calcium)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Caffeine (mg)</label>
+                            <input type="number" step="0.1" id="editCaffeine-${id}" value="${getVal(food.caffeine)}">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-primary" onclick="savePantryEdit(${id})">Save</button>
+                        <button class="btn" onclick="renderPantry()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById(`pantry-${id}`).innerHTML = editHtml;
+        }
+        
+        function toggleEditPantryType(id) {
+            const type = document.getElementById(`editType-${id}`).value;
+            const servingInput = document.getElementById(`editServing-${id}`);
+            const servingLabel = document.getElementById(`editServingLabel-${id}`);
+            
+            if (type === 'drink') {
+                servingInput.value = 100;
+                servingInput.readOnly = true;
+                servingLabel.textContent = 'Serving (ml) *';
+            } else {
+                servingInput.readOnly = false;
+                servingLabel.textContent = 'Serving (g) *';
+            }
+        }
+        
+        function savePantryEdit(id) {
+            const food = pantry.find(f => f.id === id);
+            if (!food) return;
+            
+            const getValOrNR = (inputId) => {
+                const val = document.getElementById(inputId).value.trim();
+                return val ? parseFloat(val) : 'NR';
+            };
+            
+            food.type = document.getElementById(`editType-${id}`).value;
+            food.name = document.getElementById(`editName-${id}`).value;
+            food.servingSize = parseFloat(document.getElementById(`editServing-${id}`).value);
+            food.kilojoules = parseFloat(document.getElementById(`editKJ-${id}`).value);
+            food.carbs = parseFloat(document.getElementById(`editCarbs-${id}`).value);
+            food.sugars = getValOrNR(`editSugars-${id}`);
+            food.protein = getValOrNR(`editProtein-${id}`);
+            food.fat = getValOrNR(`editFat-${id}`);
+            food.fibre = getValOrNR(`editFibre-${id}`);
+            food.sodium = getValOrNR(`editSodium-${id}`);
+            food.magnesium = getValOrNR(`editMagnesium-${id}`);
+            food.potassium = getValOrNR(`editPotassium-${id}`);
+            food.calcium = getValOrNR(`editCalcium-${id}`);
+            food.caffeine = getValOrNR(`editCaffeine-${id}`);
+            
+            // Update all consumption log entries that reference this food
+            updateConsumptionLogForFood(food);
+            
+            saveToLocalStorage();
+            renderPantry();
+            updateFoodSelect();
+            renderConsumptionLog();
+        }
+        
+        function updateConsumptionLogForFood(food) {
+            consumptionLog.forEach(entry => {
+                if (entry.foodId === food.id) {
+                    const ratio = entry.amount / food.servingSize;
+                    
+                    entry.foodName = food.name;
+                    entry.kilojoules = (food.kilojoules || 0) * ratio;
+                    entry.carbs = (food.carbs || 0) * ratio;
+                    entry.sugars = (food.sugars === 'NR' || food.sugars === undefined) ? 'NR' : food.sugars * ratio;
+                    entry.protein = (food.protein === 'NR' || food.protein === undefined) ? 'NR' : food.protein * ratio;
+                    entry.fat = (food.fat === 'NR' || food.fat === undefined) ? 'NR' : food.fat * ratio;
+                    entry.fibre = (food.fibre === 'NR' || food.fibre === undefined) ? 'NR' : food.fibre * ratio;
+                    entry.sodium = (food.sodium === 'NR' || food.sodium === undefined) ? 'NR' : food.sodium * ratio;
+                    entry.magnesium = (food.magnesium === 'NR' || food.magnesium === undefined) ? 'NR' : food.magnesium * ratio;
+                    entry.potassium = (food.potassium === 'NR' || food.potassium === undefined) ? 'NR' : food.potassium * ratio;
+                    entry.calcium = (food.calcium === 'NR' || food.calcium === undefined) ? 'NR' : food.calcium * ratio;
+                    entry.caffeine = (food.caffeine === 'NR' || food.caffeine === undefined) ? 'NR' : food.caffeine * ratio;
+                }
+            });
+        }
+        
+        function renderPantry() {
+            const list = document.getElementById('pantryList');
+            if (pantry.length === 0) {
+                list.innerHTML = '<div class="empty-state">Your pantry is empty!</div>';
+                return;
+            }
+            list.innerHTML = pantry.map(food => `
+                <div class="pantry-item" id="pantry-${food.id}">
+                    <div class="pantry-item-header">
+                        <div class="pantry-item-name">${food.type === 'drink' ? '💧' : '🍎'} ${food.name}</div>
+                        <div style="display:flex;gap:5px;">
+                            <button class="btn" onclick="editPantryItem(${food.id})">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteFoodFromPantry(${food.id})">Delete</button>
+                        </div>
+                    </div>
+                    <div class="pantry-item-details">
+                        <div><strong>Serving:</strong> ${food.servingSize}${food.type === 'drink' ? 'ml' : 'g'}</div>
+                        <div><strong>Kilojoules:</strong> ${food.kilojoules} kJ</div>
+                        <div><strong>Carbs:</strong> ${food.carbs}g</div>
+                        <div><strong>Sugars:</strong> ${food.sugars === 'NR' ? 'NR' : food.sugars + 'g'}</div>
+                        <div><strong>Protein:</strong> ${food.protein === 'NR' ? 'NR' : food.protein + 'g'}</div>
+                        <div><strong>Fat:</strong> ${food.fat === 'NR' ? 'NR' : food.fat + 'g'}</div>
+                        <div><strong>Fibre:</strong> ${food.fibre === 'NR' ? 'NR' : food.fibre + 'g'}</div>
+                        <div><strong>Sodium:</strong> ${food.sodium === 'NR' ? 'NR' : food.sodium + 'mg'}</div>
+                        <div><strong>Magnesium:</strong> ${food.magnesium === 'NR' ? 'NR' : food.magnesium + 'mg'}</div>
+                        <div><strong>Potassium:</strong> ${food.potassium === 'NR' ? 'NR' : food.potassium + 'mg'}</div>
+                        <div><strong>Calcium:</strong> ${food.calcium === 'NR' ? 'NR' : food.calcium + 'mg'}</div>
+                        <div><strong>Caffeine:</strong> ${food.caffeine === 'NR' ? 'NR' : food.caffeine + 'mg'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateFoodSelect() {
+            const select = document.getElementById('foodSelect');
+            select.innerHTML = '<option value="">Select...</option>' +
+                pantry.map(food => `<option value="${food.id}">${food.name}</option>`).join('');
+        }
+        
+        function toggleContinuousFields() {
+            const isContinuous = document.querySelector('input[name="consumptionType"]:checked').value === 'continuous';
+            document.getElementById('endTimeGroup').style.display = isContinuous ? 'block' : 'none';
+            document.getElementById('startTimeLabel').textContent = isContinuous ? 'Start Time *' : 'Time *';
+            
+            // Make end time required only for continuous
+            document.getElementById('endHour').required = isContinuous;
+            document.getElementById('endMinute').required = isContinuous;
+        }
+        
+        function updateAmountField() {
+            const foodId = parseInt(document.getElementById('foodSelect').value);
+            const food = pantry.find(f => f.id === foodId);
+            const amountLabel = document.getElementById('amountLabel');
+            const amountInput = document.getElementById('amountConsumed');
+            const unitSelect = document.getElementById('amountUnit');
+            
+            if (!food) {
+                amountLabel.textContent = 'Amount *';
+                amountInput.placeholder = 'e.g., 300';
+                unitSelect.style.display = 'none';
+                return;
+            }
+            
+            if (food.type === 'drink') {
+                amountLabel.textContent = 'Amount (ml) *';
+                amountInput.placeholder = 'e.g., 300';
+                unitSelect.style.display = 'none';
+            } else {
+                amountLabel.textContent = 'Amount *';
+                unitSelect.style.display = 'block';
+                unitSelect.value = 'grams';
+                updateAmountPlaceholder();
+            }
+        }
+        
+        function updateAmountPlaceholder() {
+            const foodId = parseInt(document.getElementById('foodSelect').value);
+            const food = pantry.find(f => f.id === foodId);
+            const amountInput = document.getElementById('amountConsumed');
+            const unitSelect = document.getElementById('amountUnit');
+            
+            if (!food || food.type === 'drink') return;
+            
+            if (unitSelect.value === 'serves') {
+                amountInput.placeholder = `e.g., 1 (1 serve = ${food.servingSize}g)`;
+            } else {
+                amountInput.placeholder = 'e.g., 30';
+            }
+        }
+        
+        function addConsumption(event) {
+            event.preventDefault();
+            const foodId = parseInt(document.getElementById('foodSelect').value);
+            const food = pantry.find(f => f.id === foodId);
+            if (!food) return;
+            
+            const consumptionType = document.querySelector('input[name="consumptionType"]:checked').value;
+            const startHour = parseInt(document.getElementById('startHour').value) || 0;
+            const startMinute = parseInt(document.getElementById('startMinute').value) || 0;
+            const startTime = startHour * 60 + startMinute;
+            
+            let endTime = null;
+            if (consumptionType === 'continuous') {
+                const endHour = parseInt(document.getElementById('endHour').value) || 0;
+                const endMinute = parseInt(document.getElementById('endMinute').value) || 0;
+                endTime = endHour * 60 + endMinute;
+                
+                if (endTime <= startTime) {
+                    alert('End time must be after start time!');
+                    return;
+                }
+            }
+            
+            let amount = parseFloat(document.getElementById('amountConsumed').value);
+            const unitSelect = document.getElementById('amountUnit');
+            
+            // If food and using serves, convert to grams
+            if (food.type === 'food' && unitSelect.value === 'serves') {
+                amount = amount * food.servingSize;
+            }
+            
+            const ratio = amount / food.servingSize;
+            
+            const entry = {
+                id: Date.now(),
+                consumptionType: consumptionType,
+                startTime: startTime,
+                endTime: endTime,
+                time: startTime, // Keep for backward compatibility and sorting
+                foodId: foodId,
+                foodName: food.name,
+                amount: amount,
+                kilojoules: (food.kilojoules || 0) * ratio,
+                carbs: (food.carbs || 0) * ratio,
+                sugars: (food.sugars === 'NR' || food.sugars === undefined) ? 'NR' : food.sugars * ratio,
+                protein: (food.protein === 'NR' || food.protein === undefined) ? 'NR' : food.protein * ratio,
+                fat: (food.fat === 'NR' || food.fat === undefined) ? 'NR' : food.fat * ratio,
+                fibre: (food.fibre === 'NR' || food.fibre === undefined) ? 'NR' : food.fibre * ratio,
+                sodium: (food.sodium === 'NR' || food.sodium === undefined) ? 'NR' : food.sodium * ratio,
+                magnesium: (food.magnesium === 'NR' || food.magnesium === undefined) ? 'NR' : food.magnesium * ratio,
+                potassium: (food.potassium === 'NR' || food.potassium === undefined) ? 'NR' : food.potassium * ratio,
+                calcium: (food.calcium === 'NR' || food.calcium === undefined) ? 'NR' : food.calcium * ratio,
+                caffeine: (food.caffeine === 'NR' || food.caffeine === undefined) ? 'NR' : food.caffeine * ratio
+            };
+            
+            consumptionLog.push(entry);
+            consumptionLog.sort((a, b) => (a.startTime || a.time) - (b.startTime || b.time));
+            saveToLocalStorage();
+            renderConsumptionLog();
+            document.getElementById('consumptionForm').reset();
+            toggleContinuousFields(); // Reset to bolus view
+            updateAmountField(); // Reset amount field to default state
+        }
+        
+        function deleteConsumption(id) {
+            consumptionLog = consumptionLog.filter(e => e.id !== id);
+            saveToLocalStorage();
+            renderConsumptionLog();
+        }
+        
+        function editConsumption(id) {
+            const entry = consumptionLog.find(e => e.id === id);
+            if (!entry) return;
+            
+            const startTime = entry.startTime !== undefined ? entry.startTime : entry.time;
+            const startH = Math.floor(startTime / 60);
+            const startM = startTime % 60;
+            
+            let editHtml = `
+                <div class="edit-form" id="edit-${id}">
+                    <div class="form-grid" style="margin-bottom:10px;">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="editType-${id}" onchange="toggleEditEndTime(${id})">
+                                <option value="bolus" ${entry.consumptionType !== 'continuous' ? 'selected' : ''}>⚡ Bolus</option>
+                                <option value="continuous" ${entry.consumptionType === 'continuous' ? 'selected' : ''}>↔️ Continuous</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Time</label>
+                            <div style="display:flex;gap:5px;">
+                                <input type="number" id="editStartH-${id}" value="${startH}" min="0" max="48" style="width:60px;">
+                                <span>h</span>
+                                <input type="number" id="editStartM-${id}" value="${startM}" min="0" max="59" style="width:60px;">
+                                <span>m</span>
+                            </div>
+                        </div>
+                        <div class="form-group" id="editEndTimeGroup-${id}" style="display:${entry.consumptionType === 'continuous' ? 'block' : 'none'};">
+                            <label>End Time</label>
+                            <div style="display:flex;gap:5px;">
+                                <input type="number" id="editEndH-${id}" value="${entry.endTime ? Math.floor(entry.endTime / 60) : ''}" min="0" max="48" style="width:60px;">
+                                <span>h</span>
+                                <input type="number" id="editEndM-${id}" value="${entry.endTime ? entry.endTime % 60 : ''}" min="0" max="59" style="width:60px;">
+                                <span>m</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (g/ml)</label>
+                            <input type="number" step="0.1" id="editAmount-${id}" value="${entry.amount}" style="width:100px;">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-primary" onclick="saveEditConsumption(${id})">Save</button>
+                        <button class="btn" onclick="renderConsumptionLog()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById(`entry-${id}`).innerHTML = editHtml;
+        }
+        
+        function toggleEditEndTime(id) {
+            const type = document.getElementById(`editType-${id}`).value;
+            document.getElementById(`editEndTimeGroup-${id}`).style.display = type === 'continuous' ? 'block' : 'none';
+        }
+        
+        function saveEditConsumption(id) {
+            const entry = consumptionLog.find(e => e.id === id);
+            if (!entry) return;
+            
+            const food = pantry.find(f => f.id === entry.foodId);
+            const consumptionType = document.getElementById(`editType-${id}`).value;
+            const startH = parseInt(document.getElementById(`editStartH-${id}`).value) || 0;
+            const startM = parseInt(document.getElementById(`editStartM-${id}`).value) || 0;
+            const startTime = startH * 60 + startM;
+            const newAmount = parseFloat(document.getElementById(`editAmount-${id}`).value);
+            
+            let endTime = null;
+            if (consumptionType === 'continuous') {
+                const endH = parseInt(document.getElementById(`editEndH-${id}`).value) || 0;
+                const endM = parseInt(document.getElementById(`editEndM-${id}`).value) || 0;
+                endTime = endH * 60 + endM;
+                
+                if (endTime <= startTime) {
+                    alert('End time must be after start time!');
+                    return;
+                }
+            }
+            
+            // Recalculate nutrients if amount changed and food still exists
+            if (food && newAmount !== entry.amount) {
+                const ratio = newAmount / food.servingSize;
+                entry.kilojoules = (food.kilojoules || 0) * ratio;
+                entry.carbs = (food.carbs || 0) * ratio;
+                entry.sugars = (food.sugars === 'NR' || food.sugars === undefined) ? 'NR' : food.sugars * ratio;
+                entry.protein = (food.protein === 'NR' || food.protein === undefined) ? 'NR' : food.protein * ratio;
+                entry.fat = (food.fat === 'NR' || food.fat === undefined) ? 'NR' : food.fat * ratio;
+                entry.fibre = (food.fibre === 'NR' || food.fibre === undefined) ? 'NR' : food.fibre * ratio;
+                entry.sodium = (food.sodium === 'NR' || food.sodium === undefined) ? 'NR' : food.sodium * ratio;
+                entry.magnesium = (food.magnesium === 'NR' || food.magnesium === undefined) ? 'NR' : food.magnesium * ratio;
+                entry.potassium = (food.potassium === 'NR' || food.potassium === undefined) ? 'NR' : food.potassium * ratio;
+                entry.calcium = (food.calcium === 'NR' || food.calcium === undefined) ? 'NR' : food.calcium * ratio;
+                entry.caffeine = (food.caffeine === 'NR' || food.caffeine === undefined) ? 'NR' : food.caffeine * ratio;
+            }
+            
+            entry.consumptionType = consumptionType;
+            entry.startTime = startTime;
+            entry.time = startTime;
+            entry.endTime = endTime;
+            entry.amount = newAmount;
+            
+            consumptionLog.sort((a, b) => (a.startTime || a.time) - (b.startTime || b.time));
+            saveToLocalStorage();
+            renderConsumptionLog();
+        }
+        
+        function renderConsumptionLog() {
+            const log = document.getElementById('consumptionLog');
+            if (consumptionLog.length === 0) {
+                log.innerHTML = '<div class="empty-state">No entries yet!</div>';
+                return;
+            }
+            
+            // Ensure sorted chronologically
+            consumptionLog.sort((a, b) => (a.startTime || a.time) - (b.startTime || b.time));
+            
+            const fmt = (val, dec, unit) => (val === 'NR' || val === undefined || val === null) ? 'NR' : val.toFixed(dec) + unit;
+            
+            const formatTimeDisplay = (entry) => {
+                const start = entry.startTime !== undefined ? entry.startTime : entry.time;
+                if (entry.consumptionType === 'continuous' && entry.endTime) {
+                    return `${formatTime(start)} → ${formatTime(entry.endTime)}`;
+                }
+                return formatTime(start);
+            };
+            
+            const getTypeIcon = (entry) => {
+                return entry.consumptionType === 'continuous' ? '↔️' : '⚡';
+            };
+            
+            log.innerHTML = consumptionLog.map(entry => {
+                const food = pantry.find(f => f.id === entry.foodId);
+                const unit = food && food.type === 'drink' ? 'ml' : 'g';
+                return `
+                <div class="log-entry" id="entry-${entry.id}">
+                    <div>
+                        <div class="log-entry-time">${getTypeIcon(entry)} ${formatTimeDisplay(entry)}</div>
+                        <div>${entry.foodName} (${entry.amount}${unit})</div>
+                        <div style="font-size:0.9rem;color:#666;">
+                            ${fmt(entry.kilojoules, 0, ' kJ')} | ${fmt(entry.carbs, 1, 'g')} carbs | ${fmt(entry.sugars, 1, 'g')} sugars | 
+                            ${fmt(entry.protein, 1, 'g')} protein | ${fmt(entry.fat, 1, 'g')} fat | ${fmt(entry.fibre, 1, 'g')} fibre | 
+                            ${fmt(entry.sodium, 0, 'mg')} Na | ${fmt(entry.magnesium, 0, 'mg')} Mg | ${fmt(entry.potassium, 0, 'mg')} K | ${fmt(entry.calcium, 0, 'mg')} Ca | ${fmt(entry.caffeine, 0, 'mg')} caff
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:5px;">
+                        <button class="btn" onclick="editConsumption(${entry.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteConsumption(${entry.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        
+        function formatTime(minutes) {
+            const h = Math.floor(minutes / 60);
+            const m = minutes % 60;
+            return `${h}h ${m}m`;
+        }
+        
+        // Simple Goals Functions
+        function saveSimpleGoals(event) {
+            event.preventDefault();
+            simpleGoals = {
+                kilojoules: parseFloat(document.getElementById('simpleGoalKilojoules').value) || 0,
+                carbs: parseFloat(document.getElementById('simpleGoalCarbs').value) || 0,
+                sugars: parseFloat(document.getElementById('simpleGoalSugars').value) || 0,
+                protein: parseFloat(document.getElementById('simpleGoalProtein').value) || 0,
+                fat: parseFloat(document.getElementById('simpleGoalFat').value) || 0,
+                fibre: parseFloat(document.getElementById('simpleGoalFibre').value) || 0,
+                sodium: parseFloat(document.getElementById('simpleGoalSodium').value) || 0,
+                magnesium: parseFloat(document.getElementById('simpleGoalMagnesium').value) || 0,
+                potassium: parseFloat(document.getElementById('simpleGoalPotassium').value) || 0,
+                calcium: parseFloat(document.getElementById('simpleGoalCalcium').value) || 0,
+                electrolytes: parseFloat(document.getElementById('simpleGoalElectrolytes').value) || 0,
+                caffeine: parseFloat(document.getElementById('simpleGoalCaffeine').value) || 0
+            };
+            saveToLocalStorage();
+            alert('Goals saved!');
+        }
+        
+        function loadSimpleGoals() {
+            document.getElementById('simpleGoalKilojoules').value = simpleGoals.kilojoules || '';
+            document.getElementById('simpleGoalCarbs').value = simpleGoals.carbs || '';
+            document.getElementById('simpleGoalSugars').value = simpleGoals.sugars || '';
+            document.getElementById('simpleGoalProtein').value = simpleGoals.protein || '';
+            document.getElementById('simpleGoalFat').value = simpleGoals.fat || '';
+            document.getElementById('simpleGoalFibre').value = simpleGoals.fibre || '';
+            document.getElementById('simpleGoalSodium').value = simpleGoals.sodium || '';
+            document.getElementById('simpleGoalMagnesium').value = simpleGoals.magnesium || '';
+            document.getElementById('simpleGoalPotassium').value = simpleGoals.potassium || '';
+            document.getElementById('simpleGoalCalcium').value = simpleGoals.calcium || '';
+            document.getElementById('simpleGoalElectrolytes').value = simpleGoals.electrolytes || '';
+            document.getElementById('simpleGoalCaffeine').value = simpleGoals.caffeine || '';
+        }
+        
+        // Goal Period Functions (Advanced Mode)
+        function addGoalPeriod(event) {
+            event.preventDefault();
+            
+            const startHour = parseFloat(document.getElementById('periodStartHour').value);
+            const endHour = parseFloat(document.getElementById('periodEndHour').value);
+            
+            if (endHour <= startHour) {
+                alert('End time must be after start time!');
+                return;
+            }
+            
+            // Check for overlapping periods
+            const overlap = goalPeriods.some(p => 
+                (startHour >= p.startHour && startHour < p.endHour) ||
+                (endHour > p.startHour && endHour <= p.endHour) ||
+                (startHour <= p.startHour && endHour >= p.endHour)
+            );
+            
+            if (overlap) {
+                alert('This time period overlaps with an existing goal period!');
+                return;
+            }
+            
+            const period = {
+                id: Date.now(),
+                startHour: startHour,
+                endHour: endHour,
+                kilojoules: parseFloat(document.getElementById('periodKilojoules').value) || 0,
+                carbs: parseFloat(document.getElementById('periodCarbs').value) || 0,
+                sugars: parseFloat(document.getElementById('periodSugars').value) || 0,
+                protein: parseFloat(document.getElementById('periodProtein').value) || 0,
+                fat: parseFloat(document.getElementById('periodFat').value) || 0,
+                fibre: parseFloat(document.getElementById('periodFibre').value) || 0,
+                sodium: parseFloat(document.getElementById('periodSodium').value) || 0,
+                magnesium: parseFloat(document.getElementById('periodMagnesium').value) || 0,
+                potassium: parseFloat(document.getElementById('periodPotassium').value) || 0,
+                calcium: parseFloat(document.getElementById('periodCalcium').value) || 0,
+                electrolytes: parseFloat(document.getElementById('periodElectrolytes').value) || 0,
+                caffeine: parseFloat(document.getElementById('periodCaffeine').value) || 0
+            };
+            
+            goalPeriods.push(period);
+            goalPeriods.sort((a, b) => a.startHour - b.startHour);
+            saveToLocalStorage();
+            renderGoalPeriods();
+            document.getElementById('addGoalPeriodForm').reset();
+        }
+        
+        function deleteGoalPeriod(id) {
+            goalPeriods = goalPeriods.filter(p => p.id !== id);
+            saveToLocalStorage();
+            renderGoalPeriods();
+        }
+        
+        function renderGoalPeriods() {
+            const container = document.getElementById('goalPeriodsList');
+            
+            if (goalPeriods.length === 0) {
+                container.innerHTML = '<div class="empty-state">No goal periods set yet. Add your first period below!</div>';
+                return;
+            }
+            
+            const formatVal = (val, unit) => val > 0 ? `${val}${unit}` : null;
+            
+            container.innerHTML = goalPeriods.map(period => {
+                const details = [
+                    formatVal(period.kilojoules, ' kJ'),
+                    formatVal(period.carbs, 'g carbs'),
+                    formatVal(period.sugars, 'g sugars'),
+                    formatVal(period.protein, 'g protein'),
+                    formatVal(period.fat, 'g fat'),
+                    formatVal(period.fibre, 'g fibre'),
+                    formatVal(period.sodium, 'mg Na'),
+                    formatVal(period.magnesium, 'mg Mg'),
+                    formatVal(period.potassium, 'mg K'),
+                    formatVal(period.calcium, 'mg Ca'),
+                    formatVal(period.electrolytes, 'mg electrolytes'),
+                    formatVal(period.caffeine, 'mg caffeine')
+                ].filter(Boolean);
+                
+                return `
+                    <div class="goal-period">
+                        <div class="goal-period-header">
+                            <div class="goal-period-time">⏱️ Hour ${period.startHour} → Hour ${period.endHour}</div>
+                            <button class="btn btn-danger" onclick="deleteGoalPeriod(${period.id})">Delete</button>
+                        </div>
+                        <div class="goal-period-details">
+                            ${details.length > 0 ? details.map(d => `<span>${d}/hr</span>`).join('') : '<span style="color:#999;">No targets set</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Generate cumulative goal line data for a nutrient
+        function generateGoalLineData(nutrient, maxTimeMinutes) {
+            // Simple mode - straight line from 0 to cumulative target
+            if (goalMode === 'simple') {
+                const rate = simpleGoals[nutrient] || 0;
+                if (rate <= 0) return null;
+                
+                return [
+                    { x: 0, y: 0 },
+                    { x: maxTimeMinutes, y: (rate * maxTimeMinutes) / 60 }
+                ];
+            }
+            
+            // Advanced mode - stepped line based on periods
+            if (goalPeriods.length === 0) return null;
+            
+            // Check if any period has this nutrient set
+            const hasNutrient = goalPeriods.some(p => p[nutrient] > 0);
+            if (!hasNutrient) return null;
+            
+            const data = [{ x: 0, y: 0 }];
+            let cumulativeValue = 0;
+            
+            // Sort periods by start time
+            const sortedPeriods = [...goalPeriods].sort((a, b) => a.startHour - b.startHour);
+            
+            sortedPeriods.forEach(period => {
+                const startMinutes = period.startHour * 60;
+                const endMinutes = Math.min(period.endHour * 60, maxTimeMinutes);
+                
+                if (startMinutes > maxTimeMinutes) return;
+                
+                // Add point at start of period (continuing from previous cumulative)
+                if (data[data.length - 1].x < startMinutes) {
+                    data.push({ x: startMinutes, y: cumulativeValue });
+                }
+                
+                // Calculate value at end of this period
+                const durationHours = (endMinutes - startMinutes) / 60;
+                const periodValue = (period[nutrient] || 0) * durationHours;
+                cumulativeValue += periodValue;
+                
+                // Add point at end of period
+                data.push({ x: endMinutes, y: cumulativeValue });
+            });
+            
+            // Extend to max time if needed (flat line after last period)
+            if (data[data.length - 1].x < maxTimeMinutes) {
+                data.push({ x: maxTimeMinutes, y: cumulativeValue });
+            }
+            
+            return data;
+        }
+        
+        function initializeCharts() {
+            const createChart = (id, label) => new Chart(document.getElementById(id).getContext('2d'), {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { 
+                            type: 'linear', 
+                            title: { display: true, text: 'Minutes' },
+                            stacked: true
+                        },
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: label },
+                            stacked: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += Math.round(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            charts.kilojoules = createChart('kilojoulesChart', 'Kilojoules (kJ)');
+            charts.carbs = createChart('carbsChart', 'Carbs (g)');
+            charts.sugars = createChart('sugarsChart', 'Sugars (g)');
+            charts.protein = createChart('proteinChart', 'Protein (g)');
+            charts.fat = createChart('fatChart', 'Fat (g)');
+            charts.fibre = createChart('fibreChart', 'Fibre (g)');
+            charts.sodium = createChart('sodiumChart', 'Sodium (mg)');
+            charts.magnesium = createChart('magnesiumChart', 'Magnesium (mg)');
+            charts.potassium = createChart('potassiumChart', 'Potassium (mg)');
+            charts.calcium = createChart('calciumChart', 'Calcium (mg)');
+            charts.electrolytes = createChart('electrolytesChart', 'Total Electrolytes (mg)');
+            charts.caffeine = createChart('caffeineChart', 'Caffeine (mg)');
+        }
+        
+        // Color palette for food sources
+        const foodColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8B500', '#00CED1', '#FF7F50', '#9370DB', '#3CB371',
+            '#FFB6C1', '#20B2AA', '#FFA07A', '#778899', '#B0C4DE'
+        ];
+        
+        function getFoodColor(foodName, foodColorMap) {
+            if (!foodColorMap.has(foodName)) {
+                foodColorMap.set(foodName, foodColors[foodColorMap.size % foodColors.length]);
+            }
+            return foodColorMap.get(foodName);
+        }
+        
+        function updateAllCharts() {
+            if (consumptionLog.length === 0) {
+                // Clear all charts
+                Object.values(charts).forEach(chart => {
+                    chart.data.datasets = [];
+                    chart.update();
+                });
+                return;
+            }
+            
+            const getVal = (v) => (v === 'NR' || v === undefined || v === null) ? 0 : v;
+            
+            // Get unique food names and assign colors
+            const foodColorMap = new Map();
+            const foodNames = [...new Set(consumptionLog.map(e => e.foodName))];
+            foodNames.forEach(name => getFoodColor(name, foodColorMap));
+            
+            // Get all time points (including 0)
+            const allTimes = [0, ...new Set(consumptionLog.map(e => e.startTime !== undefined ? e.startTime : e.time))].sort((a, b) => a - b);
+            
+            // Build cumulative data by food source
+            const nutrients = ['kilojoules', 'carbs', 'sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'];
+            
+            // For each nutrient, create datasets for each food
+            nutrients.forEach(nutrient => {
+                const datasets = [];
+                
+                foodNames.forEach(foodName => {
+                    const color = getFoodColor(foodName, foodColorMap);
+                    const cumulativeData = [];
+                    let cumulative = 0;
+                    
+                    allTimes.forEach(time => {
+                        // Add any consumption of this food at or before this time
+                        consumptionLog.forEach(e => {
+                            const entryTime = e.startTime !== undefined ? e.startTime : e.time;
+                            if (e.foodName === foodName && entryTime === time && time > 0) {
+                                cumulative += getVal(e[nutrient]);
+                            }
+                        });
+                        cumulativeData.push({ x: time, y: cumulative });
+                    });
+                    
+                    datasets.push({
+                        label: foodName,
+                        data: cumulativeData,
+                        borderColor: color,
+                        backgroundColor: color + '80',
+                        fill: true,
+                        tension: 0.1
+                    });
+                });
+                
+                // Add goal line using new advanced goals system
+                const maxTime = Math.max(...allTimes);
+                const goalLineData = generateGoalLineData(nutrient, maxTime);
+                if (goalLineData) {
+                    datasets.push({
+                        label: 'Goal Target',
+                        data: goalLineData,
+                        borderColor: '#dc3545',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    });
+                }
+                
+                charts[nutrient].data.datasets = datasets;
+                charts[nutrient].update();
+            });
+            
+            // Handle electrolytes separately (sum of Na, Mg, K, Ca)
+            const electrolyteDatasets = [];
+            
+            foodNames.forEach(foodName => {
+                const color = getFoodColor(foodName, foodColorMap);
+                const cumulativeData = [];
+                let cumulative = 0;
+                
+                allTimes.forEach(time => {
+                    consumptionLog.forEach(e => {
+                        const entryTime = e.startTime !== undefined ? e.startTime : e.time;
+                        if (e.foodName === foodName && entryTime === time && time > 0) {
+                            cumulative += getVal(e.sodium) + getVal(e.magnesium) + getVal(e.potassium) + getVal(e.calcium);
+                        }
+                    });
+                    cumulativeData.push({ x: time, y: cumulative });
+                });
+                
+                electrolyteDatasets.push({
+                    label: foodName,
+                    data: cumulativeData,
+                    borderColor: color,
+                    backgroundColor: color + '80',
+                    fill: true,
+                    tension: 0.1
+                });
+            });
+            
+            // Add electrolytes goal line
+            const maxTime = Math.max(...allTimes);
+            const electrolyteGoalData = generateGoalLineData('electrolytes', maxTime);
+            if (electrolyteGoalData) {
+                electrolyteDatasets.push({
+                    label: 'Goal Target',
+                    data: electrolyteGoalData,
+                    borderColor: '#dc3545',
+                    borderDash: [5, 5],
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                });
+            }
+            
+            charts.electrolytes.data.datasets = electrolyteDatasets;
+            charts.electrolytes.update();
+        }
+        
+        function saveToLocalStorage() {
+            localStorage.setItem('pantry', JSON.stringify(pantry));
+            localStorage.setItem('consumptionLog', JSON.stringify(consumptionLog));
+            localStorage.setItem('goalPeriods', JSON.stringify(goalPeriods));
+            localStorage.setItem('simpleGoals', JSON.stringify(simpleGoals));
+            localStorage.setItem('goalMode', goalMode);
+        }
+        
+        function loadFromLocalStorage() {
+            pantry = JSON.parse(localStorage.getItem('pantry')) || [];
+            consumptionLog = JSON.parse(localStorage.getItem('consumptionLog')) || [];
+            goalPeriods = JSON.parse(localStorage.getItem('goalPeriods')) || [];
+            simpleGoals = JSON.parse(localStorage.getItem('simpleGoals')) || {};
+            goalMode = localStorage.getItem('goalMode') || 'simple';
+        }
+        
+        function clearAllData() {
+            if (confirm('⚠️ Are you sure you want to delete ALL data?\n\nThis will clear:\n• Your entire pantry\n• All race log entries\n• All goals\n\nThis cannot be undone!')) {
+                if (confirm('This is your last chance! Really delete everything?')) {
+                    localStorage.removeItem('pantry');
+                    localStorage.removeItem('consumptionLog');
+                    localStorage.removeItem('goalPeriods');
+                    localStorage.removeItem('simpleGoals');
+                    localStorage.removeItem('goalMode');
+                    pantry = [];
+                    consumptionLog = [];
+                    goalPeriods = [];
+                    simpleGoals = {};
+                    goalMode = 'simple';
+                    renderPantry();
+                    renderConsumptionLog();
+                    updateFoodSelect();
+                    renderGoalPeriods();
+                    loadSimpleGoals();
+                    applyGoalMode();
+                    updateAllCharts();
+                    alert('All data has been cleared.');
+                }
+            }
+        }
+        
+        // CSV Export Function
+        function exportPantryCSV() {
+            if (pantry.length === 0) {
+                alert('Your pantry is empty! Add some items first.');
+                return;
+            }
+            
+            const headers = ['type', 'name', 'servingSize', 'kilojoules', 'carbs', 'sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'];
+            const csvContent = [
+                headers.join(','),
+                ...pantry.map(food => 
+                    headers.map(h => {
+                        const val = food[h];
+                        // Escape commas and quotes in strings
+                        if (typeof val === 'string') {
+                            return `"${val.replace(/"/g, '""')}"`;
+                        }
+                        return val;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'pantry_export.csv';
+            link.click();
+        }
+        
+        // CSV Import Function
+        function importPantryCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length < 2) {
+                        alert('CSV file is empty or invalid.');
+                        return;
+                    }
+                    
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    const requiredHeaders = ['type', 'name', 'servingSize', 'kilojoules', 'carbs'];
+                    
+                    // Check for required headers
+                    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+                    if (missingHeaders.length > 0) {
+                        alert(`Missing required columns: ${missingHeaders.join(', ')}`);
+                        return;
+                    }
+                    
+                    const imported = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        if (values.length < headers.length) continue;
+                        
+                        const food = { id: Date.now() + i };
+                        headers.forEach((header, idx) => {
+                            const val = values[idx].replace(/^"|"$/g, '').replace(/""/g, '"');
+                            if (['servingSize', 'kilojoules', 'carbs'].includes(header)) {
+                                // Required numeric fields
+                                food[header] = parseFloat(val) || 0;
+                            } else if (['sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'].includes(header)) {
+                                // Optional numeric fields - use NR if empty or NR
+                                food[header] = (val === '' || val === 'NR') ? 'NR' : parseFloat(val);
+                            } else {
+                                food[header] = val;
+                            }
+                        });
+                        
+                        // Set defaults for missing optional fields to NR
+                        food.sugars = food.sugars !== undefined ? food.sugars : 'NR';
+                        food.protein = food.protein !== undefined ? food.protein : 'NR';
+                        food.fat = food.fat !== undefined ? food.fat : 'NR';
+                        food.fibre = food.fibre !== undefined ? food.fibre : 'NR';
+                        food.sodium = food.sodium !== undefined ? food.sodium : 'NR';
+                        food.magnesium = food.magnesium !== undefined ? food.magnesium : 'NR';
+                        food.potassium = food.potassium !== undefined ? food.potassium : 'NR';
+                        food.calcium = food.calcium !== undefined ? food.calcium : 'NR';
+                        food.caffeine = food.caffeine !== undefined ? food.caffeine : 'NR';
+                        
+                        imported.push(food);
+                    }
+                    
+                    if (imported.length === 0) {
+                        alert('No valid items found in CSV.');
+                        return;
+                    }
+                    
+                    const action = confirm(`Found ${imported.length} items. Click OK to ADD to existing pantry, or Cancel to REPLACE entire pantry.`);
+                    
+                    if (action) {
+                        pantry = [...pantry, ...imported];
+                    } else {
+                        pantry = imported;
+                    }
+                    
+                    saveToLocalStorage();
+                    renderPantry();
+                    updateFoodSelect();
+                    alert(`Successfully imported ${imported.length} items!`);
+                    
+                } catch (err) {
+                    alert('Error parsing CSV file: ' + err.message);
+                }
+                
+                // Reset file input
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+        
+        // Helper to parse CSV line (handles quoted values with commas)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+        
+        // Race Log CSV Export
+        function exportRaceLogCSV() {
+            if (consumptionLog.length === 0) {
+                alert('Your race log is empty! Add some entries first.');
+                return;
+            }
+            
+            const headers = ['consumptionType', 'startTime', 'endTime', 'foodName', 'foodId', 'amount', 'kilojoules', 'carbs', 'sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'];
+            const csvContent = [
+                headers.join(','),
+                ...consumptionLog.map(entry => 
+                    headers.map(h => {
+                        let val = entry[h];
+                        if (h === 'startTime' && val === undefined) val = entry.time;
+                        if (val === undefined || val === null) val = '';
+                        if (typeof val === 'string') {
+                            return `"${val.replace(/"/g, '""')}"`;
+                        }
+                        return val;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'race_log_export.csv';
+            link.click();
+        }
+        
+        // Race Log CSV Import
+        function importRaceLogCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length < 2) {
+                        alert('CSV file is empty or invalid.');
+                        return;
+                    }
+                    
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    const requiredHeaders = ['startTime', 'foodName', 'amount'];
+                    
+                    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+                    if (missingHeaders.length > 0) {
+                        alert(`Missing required columns: ${missingHeaders.join(', ')}`);
+                        return;
+                    }
+                    
+                    const imported = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        if (values.length < 3) continue;
+                        
+                        const entry = { id: Date.now() + i };
+                        headers.forEach((header, idx) => {
+                            const val = values[idx] ? values[idx].replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+                            if (['startTime', 'endTime', 'foodId', 'amount', 'kilojoules', 'carbs', 'sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'].includes(header)) {
+                                if (val === '' || val === 'NR') {
+                                    entry[header] = (header === 'endTime') ? null : (['sugars', 'protein', 'fat', 'fibre', 'sodium', 'magnesium', 'potassium', 'calcium', 'caffeine'].includes(header) ? 'NR' : 0);
+                                } else {
+                                    entry[header] = parseFloat(val);
+                                }
+                            } else {
+                                entry[header] = val;
+                            }
+                        });
+                        
+                        entry.time = entry.startTime;
+                        entry.consumptionType = entry.consumptionType || 'bolus';
+                        
+                        imported.push(entry);
+                    }
+                    
+                    if (imported.length === 0) {
+                        alert('No valid entries found in CSV.');
+                        return;
+                    }
+                    
+                    const action = confirm(`Found ${imported.length} entries. Click OK to ADD to existing race log, or Cancel to REPLACE entire log.`);
+                    
+                    if (action) {
+                        consumptionLog = [...consumptionLog, ...imported];
+                    } else {
+                        consumptionLog = imported;
+                    }
+                    
+                    consumptionLog.sort((a, b) => (a.startTime || a.time) - (b.startTime || b.time));
+                    saveToLocalStorage();
+                    renderConsumptionLog();
+                    alert(`Successfully imported ${imported.length} entries!`);
+                    
+                } catch (err) {
+                    alert('Error parsing CSV file: ' + err.message);
+                }
+                
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
