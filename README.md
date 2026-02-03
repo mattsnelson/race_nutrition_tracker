@@ -51,4 +51,3 @@ MIT License - do whatever you want with it! 🎉
 
 ---
 
-*Built by a trail runner, for trail runners. May your gels never explode in your pack! 🏔️*
